@@ -40,14 +40,23 @@ public extension StableDiffusion3Pipeline {
     /// - Parameters:
     ///   - baseURL: URL pointing to directory holding all model and tokenization resources
     ///   - configuration: The configuration to load model resources with
+    ///   - functionName: Optional function name for multifunction CoreML models (macOS 15+/iOS 18+)
     ///   - reduceMemory: Setup pipeline in reduced memory mode
     /// - Returns:
     ///  Pipeline ready for image generation if all  necessary resources loaded
     init(
         resourcesAt baseURL: URL,
         configuration config: MLModelConfiguration = .init(),
+        functionName: String? = nil,
         reduceMemory: Bool = false
     ) throws {
+        // Set function name for multifunction models (macOS 15+/iOS 18+)
+        if let functionName = functionName {
+            if #available(macOS 15.0, iOS 18.0, *) {
+                config.functionName = functionName
+            }
+        }
+
         // Expect URL of each resource
         let urls = ResourceURLs(resourcesAt: baseURL)
         let tokenizer = try BPETokenizer(mergesAt: urls.mergesURL, vocabularyAt: urls.vocabURL)

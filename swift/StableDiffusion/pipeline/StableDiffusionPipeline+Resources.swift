@@ -50,6 +50,7 @@ public extension StableDiffusionPipeline {
     ///   - baseURL: URL pointing to directory holding all model and tokenization resources
     ///   - controlNetModelNames: Specify ControlNet models to use in generation
     ///   - configuration: The configuration to load model resources with
+    ///   - functionName: Optional function name for multifunction CoreML models (macOS 15+/iOS 18+)
     ///   - disableSafety: Load time disable of safety to save memory
     ///   - reduceMemory: Setup pipeline in reduced memory mode
     ///   - useMultilingualTextEncoder: Option to use system multilingual NLContextualEmbedding as encoder
@@ -60,11 +61,18 @@ public extension StableDiffusionPipeline {
         resourcesAt baseURL: URL,
         controlNet controlNetModelNames: [String],
         configuration config: MLModelConfiguration = .init(),
+        functionName: String? = nil,
         disableSafety: Bool = false,
         reduceMemory: Bool = false,
         useMultilingualTextEncoder: Bool = false,
         script: Script? = nil
     ) throws {
+        // Set function name for multifunction models (macOS 15+/iOS 18+)
+        if let functionName = functionName {
+            if #available(macOS 15.0, iOS 18.0, *) {
+                config.functionName = functionName
+            }
+        }
 
         /// Expect URL of each resource
         let urls = ResourceURLs(resourcesAt: baseURL)
